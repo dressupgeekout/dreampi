@@ -429,6 +429,8 @@ class Modem(object):
         logger.info("Call answered!")
         logger.info(subprocess.check_output(["pon", "dreamcast"]))
         logger.info("Connected")
+        discord_socket = socket.create_connection(("192.168.1.66", 9495), 10)
+        discord_socket.send("START\n")
 
     def send_command(self, command, timeout=60, ignore_responses=None):
         ignore_responses = ignore_responses or []  # Things to completely ignore
@@ -579,6 +581,8 @@ def process():
             # We start watching /var/log/messages for the hang up message
             for line in sh.tail("-f", "/var/log/messages", "-n", "1", _iter=True):
                 if "Modem hangup" in line:
+                    discord_socket = socket.create_connection(("192.168.1.66", 9495), 10)
+                    discord_socket.send("STOP\n")
                     logger.info("Detected modem hang up, going back to listening")
                     time.sleep(5)  # Give the hangup some time
                     break
